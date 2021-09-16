@@ -38,6 +38,7 @@
  */
 
 #include "contiki.h"
+#include "mqtt-client.h"
 
 #include <stdio.h> /* For printf() */
 #include <rpl-neighbor.h>
@@ -46,12 +47,89 @@
 #define LOG_LEVEL LOG_LEVEL_INFO
 #define MAXIMUM_NODE_ID_SIZE 120
 
+#define CONFIG_ORG_ID_LEN        32
+#define CONFIG_TYPE_ID_LEN       32
+#define CONFIG_AUTH_TOKEN_LEN    32
+#define CONFIG_EVENT_TYPE_ID_LEN 32
+#define CONFIG_CMD_TYPE_LEN       8
+#define CONFIG_IP_ADDR_STR_LEN   64
 
+#ifdef MQTT_CLIENT_CONF_ORG_ID
+#define MQTT_CLIENT_ORG_ID MQTT_CLIENT_CONF_ORG_ID
+#else
+#define MQTT_CLIENT_ORG_ID "quickstart"
+#endif
+/*---------------------------------------------------------------------------*/
+/* MQTT token */
+#ifdef MQTT_CLIENT_CONF_AUTH_TOKEN
+#define MQTT_CLIENT_AUTH_TOKEN MQTT_CLIENT_CONF_AUTH_TOKEN
+#else
+#define MQTT_CLIENT_AUTH_TOKEN "AUTHTOKEN"
+#endif
+/*---------------------------------------------------------------------------*/
+#if MQTT_CLIENT_WITH_IBM_WATSON
+/* With IBM Watson support */
+static const char *broker_ip = "0064:ff9b:0000:0000:0000:0000:b8ac:7cbd";
+#define MQTT_CLIENT_USERNAME "use-token-auth"
+
+#else /* MQTT_CLIENT_WITH_IBM_WATSON */
+/* Without IBM Watson support. To be used with other brokers, e.g. Mosquitto */
+static const char *broker_ip = MQTT_CLIENT_BROKER_IP_ADDR;
+
+#ifdef MQTT_CLIENT_CONF_USERNAME
+#define MQTT_CLIENT_USERNAME MQTT_CLIENT_CONF_USERNAME
+#else
+#define MQTT_CLIENT_USERNAME "use-token-auth"
+#endif
+
+
+// RPL STATICS
 static int last_table_row= -1;
 
+// MQTT STATICS
+static const mqtt_client_extension_t *mqtt_client_extensions[] = { NULL };
+static const uint8_t mqtt_client_extension_count = 0;
+
+typedef struct mqtt_client_config {
+    char org_id[CONFIG_ORG_ID_LEN];
+    char type_id[CONFIG_TYPE_ID_LEN];
+    char auth_token[CONFIG_AUTH_TOKEN_LEN];
+    char event_type_id[CONFIG_EVENT_TYPE_ID_LEN];
+    char broker_ip[CONFIG_IP_ADDR_STR_LEN];
+    char cmd_type[CONFIG_CMD_TYPE_LEN];
+    clock_time_t pub_interval;
+    int def_rt_ping_interval;
+    uint16_t broker_port;
+} mqtt_client_config_t;
+static mqtt_client_config_t conf;
+
 /*---------------------------------------------------------------------------*/
-PROCESS(contact_tracing_process, "Hello world process");
+PROCESS(contact_tracing_process, "Contact Tracing Process");
 AUTOSTART_PROCESSES(&contact_tracing_process);
+
+/*---------------------------------------------------------------------------*/
+static int
+init_config()
+{
+    /* Populate configuration with default values */
+    memset(&conf, 0, sizeof(mqtt_client_config_t));
+
+    memcpy(conf.org_id, MQTT_CLIENT_ORG_ID, strlen(MQTT_CLIENT_ORG_ID));
+    memcpy(conf.type_id, DEFAULT_TYPE_ID, strlen(DEFAULT_TYPE_ID));
+    memcpy(conf.auth_token, MQTT_CLIENT_AUTH_TOKEN,
+           strlen(MQTT_CLIENT_AUTH_TOKEN));
+    memcpy(conf.event_type_id, DEFAULT_EVENT_TYPE_ID,
+           strlen(DEFAULT_EVENT_TYPE_ID));
+    memcpy(conf.broker_ip, broker_ip, strlen(broker_ip));
+    memcpy(conf.cmd_type, DEFAULT_SUBSCRIBE_CMD_TYPE, 1);
+
+    conf.broker_port = DEFAULT_BROKER_PORT;
+    conf.pub_interval = DEFAULT_PUBLISH_INTERVAL;
+    conf.def_rt_ping_interval = DEFAULT_RSSI_MEAS_INTERVAL;
+
+    return 1;
+}
+/*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(contact_tracing_process, ev, data)
 {
