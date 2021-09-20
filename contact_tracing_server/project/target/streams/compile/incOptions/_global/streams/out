@@ -1,0 +1,2 @@
+[debug] Created transactional ClassFileManager with tempDir = /home/dpaletti/contact_tracing/contiki-ng-mw-2021/examples/contact_tracing_node/contact_tracing_server/project/target/scala-2.12/sbt-1.0/classes.bak
+[debug] Removing the temporary directory used for backing up class files: /home/dpaletti/contact_tracing/contiki-ng-mw-2021/examples/contact_tracing_node/contact_tracing_server/project/target/scala-2.12/sbt-1.0/classes.bak
