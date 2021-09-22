@@ -56,10 +56,9 @@
 // MQTT DEFINES
 // MQTT CONNECTION
 #define MAX_TCP_SEGMENT_SIZE 32
-#define BROKER_IP "fe80::201:1:1:1"
+#define BROKER_IP "fd00::1"
 #define BROKER_PORT 1883
 #define PUBLISH_INTERVAL    (30 * CLOCK_SECOND)
-#define CONNECTION_WAIT (CLOCK_SECOND >> 1)
 #define STATE_MACHINE_PERIODIC     (CLOCK_SECOND >> 1)
 #define NET_CONNECT_PERIODIC (CLOCK_SECOND >> 2)
 #define RECONNECT_INTERVAL (CLOCK_SECOND * 2)
@@ -72,9 +71,10 @@
 #define STATE_REGISTERED 1
 #define STATE_CONNECTING 2
 #define STATE_CONNECTED 3
-#define STATE_PUBLISHING 4
-#define STATE_DISCONNECTED 5
-# define STATE_ERROR 6
+#define STATE_PUBLISHING_CONTACTS 4
+#define STATE_PUBLISHING_EVENT_OF_INTEREST 5
+#define STATE_DISCONNECTED 6
+# define STATE_ERROR 7
 
 // MQTT TOPICS
 #define NOTIFICATIONS "/notifications"
@@ -105,10 +105,11 @@ static char contacts[BUFFER_SIZE + MAX_TOPIC_SUFFIX_LEN];
 
 
 /*---------------------------------------------------------------------------*/
-PROCESS(contact_tracing_process, "Hello world process");
+PROCESS(contact_tracing_process, "Contact tracing process");
 
 static char*
 get_nbrs(){
+    bool is_empty = true;
     if(curr_instance.used) {
         rpl_nbr_t *nbr = nbr_table_head(rpl_neighbors);
         char* nbr_ips = (char*) malloc(sizeof(char)*2);
@@ -121,14 +122,15 @@ get_nbrs(){
                 curr_rows++;
                 continue;
             }
+            is_empty = false;
             char nbr_ipaddr[MAXIMUM_NODE_ID_SIZE];
             int ip_len;
             ip_len = uiplib_ipaddr_snprint(nbr_ipaddr, sizeof(nbr_ipaddr), rpl_neighbor_get_ipaddr(nbr));
             if (ip_len <= 0 || ip_len > MAXIMUM_NODE_ID_SIZE){
                 printf("IP_LEN either < 0 or too large, Failed at line 68 in contact_tracing_node.c: ip_len = %d", ip_len);
+                free(nbr_ips);
                 return NULL;
             }
-            printf("%s\n", nbr_ipaddr);
             nbr_ips = (char*) realloc((void*) nbr_ips, sizeof(nbr_ips) + sizeof(char)*(MAXIMUM_NODE_ID_SIZE + 1));
             nbr_ips = strcat(nbr_ips, nbr_ipaddr);
             nbr_ips = strcat(nbr_ips, "-");
@@ -137,7 +139,12 @@ get_nbrs(){
             last_table_row++;
         }
         nbr_ips = strcat(nbr_ips, "]");
-        return nbr_ips;
+        if(is_empty) {
+         ù   free(nbr_ips);
+            return NULL;
+        }
+        else
+            return nbr_ips;
     }
     return NULL;
 }
@@ -167,7 +174,7 @@ mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
             break;
         }
         case MQTT_EVENT_SUBACK: {
-            printf("Application subscribed to topic");
+            printf("Application subscribed to topic\n");
             break;
         }
 
@@ -179,6 +186,12 @@ mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
             printf("Publishing complete\n");
             break;
         }
+        case MQTT_EVENT_DISCONNECTED: {
+            printf("MQTT disconnected, reason %u\n", *((mqtt_event_t *)data));
+            state = STATE_DISCONNECTED;
+            process_poll(&contact_tracing_process);
+            break;
+        }
         default:
             printf("Application got a unhandled MQTT event: %i\n", event);
             break;
@@ -188,8 +201,10 @@ mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
 void
 build_topics(){
     char client_topic[BUFFER_SIZE + 1];
+    char client_addr[BUFFER_SIZE];
+    uiplib_ipaddr_snprint(client_addr, sizeof(client_addr), rpl_get_global_address());
     snprintf(client_topic, sizeof(client_topic), "%s", "/");
-    strcat(client_topic, client_id);
+    strcat(client_topic, client_addr);
 
     snprintf(notifications, sizeof(notifications), "%s", client_topic);
     strcat(notifications, NOTIFICATIONS);
@@ -206,11 +221,18 @@ mqtt_state_machine(void)
 {
     switch(state){
         case STATE_INIT:
-            printf("MQTT init \n");
-            uiplib_ipaddr_snprint(client_id, sizeof(client_id), rpl_get_global_address());
-            build_topics();
+            snprintf(client_id, BUFFER_SIZE, "d:%s:%s:%02x%02x%02x%02x%02x%02x",
+                     "contact_tracing", "native",
+                     linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1],
+                     linkaddr_node_addr.u8[2], linkaddr_node_addr.u8[5],
+                     linkaddr_node_addr.u8[6], linkaddr_node_addr.u8[7]);
+
+
+            printf("MQTT init with client_id: %s\n", client_id);
 
             mqtt_register(&conn, &contact_tracing_process, client_id, mqtt_event, MAX_TCP_SEGMENT_SIZE);
+            mqtt_set_username_password(&conn, client_id,
+                                       "AUTHZ");
 
             conn.auto_reconnect = 0;
             connect_attempt = 1;
@@ -219,7 +241,8 @@ mqtt_state_machine(void)
             // Continue
         case STATE_REGISTERED:
             if(uip_ds6_get_global(ADDR_PREFERRED) != NULL) {
-                mqtt_connect(&conn, BROKER_IP, BROKER_PORT, PUBLISH_INTERVAL);
+                mqtt_status_t status = mqtt_connect(&conn, BROKER_IP, BROKER_PORT, PUBLISH_INTERVAL);
+                printf("Connect status %u\n", status);
                 state = STATE_CONNECTING;
             } else{
                 printf("Cannot get global ipv6 address\n");
@@ -230,8 +253,9 @@ mqtt_state_machine(void)
             printf("Connecting\n");
             break;
         case STATE_CONNECTED:
+            build_topics();
             // Continue
-        case STATE_PUBLISHING:
+        case STATE_PUBLISHING_CONTACTS:
             if(timer_expired(&connection_life)) {
                 connect_attempt = 0;
             }
@@ -240,29 +264,51 @@ mqtt_state_machine(void)
                 if (state == STATE_CONNECTED) {
                     mqtt_status_t status;
                     status = mqtt_subscribe(&conn, NULL, notifications, MQTT_QOS_LEVEL_0);
-                    printf("Subscribing");
+                    printf("Subscribing\n");
                     if(status == MQTT_STATUS_OUT_QUEUE_FULL) {
                         printf("Tried to subscribe but command queue was full!\n");
                     }
-                    state = STATE_PUBLISHING;
+                    state = STATE_PUBLISHING_CONTACTS;
                 } else {
-                    printf("Publishing\n");
                     char* nbrs = get_nbrs();
-                    mqtt_publish(&conn, NULL, contacts, (uint8_t*) nbrs , sizeof(nbrs), MQTT_QOS_LEVEL_0, MQTT_RETAIN_OFF);
-                    if((double)rand() / (double)RAND_MAX > RANDOM_EVENT_PROBABILITY){
-                        // send an important event randomly with 0.5 probability
-                        char* to_publish = "Important Event";
-                        mqtt_publish(&conn, NULL, events, (uint8_t*) to_publish , sizeof(char) * strlen(to_publish), MQTT_QOS_LEVEL_0, MQTT_RETAIN_OFF);
+                    if (nbrs != NULL) {
+                        printf("Publishing %s\n", nbrs);
+                        mqtt_publish(&conn, NULL, contacts, (uint8_t *) nbrs, sizeof(nbrs), MQTT_QOS_LEVEL_0,
+                                     MQTT_RETAIN_OFF);
+                        free(nbrs);
                     }
+                    if((double)rand() / (double)RAND_MAX > RANDOM_EVENT_PROBABILITY)
+                        // send an important event randomly with 0.5 probability
+                        state = STATE_PUBLISHING_EVENT_OF_INTEREST;
+
                 }
                 etimer_set(&publish_periodic_timer, PUBLISH_INTERVAL);
                 return;
             }else{
                 // Lost connectivity or some message not fully ACKd
-                printf("Publishing... (MQTT state=%d, q=%u)\n", conn.state,
+                printf("Publishing Contacts... (MQTT state=%d, q=%u)\n", conn.state,
                          conn.out_queue_full);
             }
             break;
+
+        case STATE_PUBLISHING_EVENT_OF_INTEREST:
+
+            if(mqtt_ready(&conn) && conn.out_buffer_sent) {
+                char *to_publish = "Event of interest";
+                mqtt_status_t status = mqtt_publish(&conn, NULL, events, (uint8_t *) to_publish,
+                                                    sizeof(char) * strlen(to_publish), MQTT_QOS_LEVEL_0,
+                                                    MQTT_RETAIN_OFF);
+                printf("C'ho er covid: %u\n", status);
+                state = STATE_PUBLISHING_CONTACTS;
+            }
+            else{
+                // Lost connectivity or some message not fully ACKd
+                printf("Publishing Event of Interest Failed with (MQTT state=%d, q=%u)\n", conn.state,
+                       conn.out_queue_full);
+            }
+            etimer_set(&publish_periodic_timer, PUBLISH_INTERVAL);
+            break;
+
         case STATE_DISCONNECTED:
             printf("Disconnected\n");
             if (connect_attempt < RECONNECT_ATTEMPTS || RECONNECT_ATTEMPTS == RETRY_FOREVER){
@@ -302,6 +348,7 @@ PROCESS_THREAD(contact_tracing_process, ev, data)
   PROCESS_BEGIN();
 
   state = STATE_INIT;
+  etimer_set(&publish_periodic_timer, 0);
 
 
   while(1) {
