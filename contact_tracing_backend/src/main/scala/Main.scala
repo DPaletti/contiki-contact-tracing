@@ -69,22 +69,19 @@ object Main extends App {
 
   wrapWithAsRestartSource(mqttSource).runForeach((msg: MqttMessageWithAck) => {
     msg.ack()
-    val name = msg.message.topic.split("/")(1)
+    val stripped_message: StrippedMqttMessage = new StrippedMqttMessage(msg)
+    val name = stripped_message.topic.split("/")(1)
     system
       .actorSelection("user/" + name)
       .resolveOne()
       .onComplete {
         case Success(actor) =>
-          actor ! msg
-          println(
-            s"Sending to $name: ${msg.message.payload.decodeString("US-ASCII")}"
-          )
+          actor ! stripped_message
 
         case Failure(ex) =>
-          println(s"Actor name is $name\n")
           val actor =
             system.actorOf(Props(classOf[ContactTracingActor], mqttSink), name)
-          actor ! msg
+          actor ! stripped_message
       }
   })
 
