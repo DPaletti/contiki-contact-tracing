@@ -1,0 +1,3 @@
+[debug] not up to date. inChanged = true, force = false
+[debug] Updating ProjectRef(uri("file:/home/massimiliano/contiki/contiki-contact-tracing/contact_tracing_backend/"), "contact_tracing_backend")...
+[debug] Done updating ProjectRef(uri("file:/home/massimiliano/contiki/contiki-contact-tracing/contact_tracing_backend/"), "contact_tracing_backend")

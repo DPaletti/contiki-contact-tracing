@@ -1,0 +1,88 @@
+[debug] > Exec(early(addDefaultCommands), None, None)
+[debug] > Exec(addDefaultCommands, None, None)
+[debug] > Exec(early(initialize), None, None)
+[debug] > Exec(initialize, None, None)
+[debug] > Exec(boot, None, None)
+[debug] > Exec(writeSbtVersion, None, None)
+[info] Updated file /home/massimiliano/contiki/contiki-contact-tracing/project/build.properties: set sbt.version to 1.4.3
+[debug] > Exec(reload, None, None)
+[debug] > Exec(sbtStashOnFailure, None, None)
+[debug] > Exec(onFailure loadFailed, None, None)
+[debug] > Exec(loadp, None, None)
+[info] welcome to sbt 1.4.3 (Private Build Java 1.8.0_292)
+[debug]       Load.loadUnit: plugins took 86.496367ms
+[debug]       Load.loadUnit: defsScala took 0.386365ms
+[debug] [Loading] Scanning directory /home/massimiliano/.sbt/1.0/plugins
+[debug] [Loading] Found non-root projects 
+[debug] [Loading] Done in /home/massimiliano/.sbt/1.0/plugins, returning: ()
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(List(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin))), Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin)))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 25.135425 ms
+[debug]           Load.resolveProject(global-plugins) took 177.688303ms
+[debug]         Load.loadTransitive: finalizeProject(Project(id global-plugins, base: /home/massimiliano/.sbt/1.0/plugins, plugins: List(<none>))) took 234.462682ms
+[debug] [Loading] Done in /home/massimiliano/.sbt/1.0/plugins, returning: (global-plugins)
+[debug]       Load.loadUnit: loadedProjectsRaw took 262.11525ms
+[debug]       Load.loadUnit: cleanEvalClasses took 0.356548ms
+[debug]     Load.loadUnit(file:/home/massimiliano/.sbt/1.0/plugins/, ...) took 380.246892ms
+[debug]   Load.apply: load took 536.716564ms
+[debug]   Load.apply: resolveProjects took 5.178534ms
+[debug]   Load.apply: finalTransforms took 54.308352ms
+[debug]   Load.apply: config.delegates took 7.313763ms
+[debug]   Load.apply: Def.make(settings)... took 330.340578ms
+[debug]   Load.apply: structureIndex took 103.622474ms
+[debug]   Load.apply: mkStreams took 2.023355ms
+[info] loading global plugins from /home/massimiliano/.sbt/1.0/plugins
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[debug] Load.defaultLoad until apply took 2395.798741ms
+[debug]           Load.loadUnit: plugins took 11.432894ms
+[debug]           Load.loadUnit: defsScala took 0.00354ms
+[debug] [Loading] Scanning directory /home/massimiliano/contiki/contiki-contact-tracing/project
+[debug] [Loading] Found non-root projects 
+[debug] [Loading] Done in /home/massimiliano/contiki/contiki-contact-tracing/project, returning: ()
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(List(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin))), Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin)))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 1.719279 ms
+[debug]               Load.resolveProject(contiki-contact-tracing-build) took 1.031833ms
+[debug]             Load.loadTransitive: finalizeProject(Project(id contiki-contact-tracing-build, base: /home/massimiliano/contiki/contiki-contact-tracing/project, plugins: List(<none>))) took 3.216152ms
+[debug] [Loading] Done in /home/massimiliano/contiki/contiki-contact-tracing/project, returning: (contiki-contact-tracing-build)
+[debug]           Load.loadUnit: loadedProjectsRaw took 4.840386ms
+[debug]           Load.loadUnit: cleanEvalClasses took 0.009422ms
+[debug]         Load.loadUnit(file:/home/massimiliano/contiki/contiki-contact-tracing/project/, ...) took 16.830642ms
+[debug]       Load.apply: load took 17.882397ms
+[debug]       Load.apply: resolveProjects took 0.103685ms
+[debug]       Load.apply: finalTransforms took 8.331648ms
+[debug]       Load.apply: config.delegates took 0.393184ms
+[debug]       Load.apply: Def.make(settings)... took 77.395815ms
+[debug]       Load.apply: structureIndex took 23.635513ms
+[debug]       Load.apply: mkStreams took 0.002601ms
+[info] loading project definition from /home/massimiliano/contiki/contiki-contact-tracing/project
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[debug]     Load.loadUnit: plugins took 847.511145ms
+[debug]     Load.loadUnit: defsScala took 0.004021ms
+[debug] [Loading] Scanning directory /home/massimiliano/contiki/contiki-contact-tracing
+[debug] [Loading] Found non-root projects 
+[debug] [Loading] Done in /home/massimiliano/contiki/contiki-contact-tracing, returning: ()
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(List(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin))), Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin)))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 1.706775 ms
+[debug]         Load.resolveProject(contiki-contact-tracing) took 1.130019ms
+[debug]       Load.loadTransitive: finalizeProject(Project(id contiki-contact-tracing, base: /home/massimiliano/contiki/contiki-contact-tracing, plugins: List(<none>))) took 3.318515ms
+[debug] [Loading] Done in /home/massimiliano/contiki/contiki-contact-tracing, returning: (contiki-contact-tracing)
+[debug]     Load.loadUnit: loadedProjectsRaw took 4.459519ms
+[debug]     Load.loadUnit: cleanEvalClasses took 0.016693ms
+[debug]   Load.loadUnit(file:/home/massimiliano/contiki/contiki-contact-tracing/, ...) took 852.504565ms
+[debug] Load.apply: load took 853.492267ms
+[debug] Load.apply: resolveProjects took 0.119024ms
+[debug] Load.apply: finalTransforms took 8.353752ms
+[debug] Load.apply: config.delegates took 0.369505ms
+[debug] Load.apply: Def.make(settings)... took 65.451918ms
+[debug] Load.apply: structureIndex took 29.999261ms
+[debug] Load.apply: mkStreams took 0.002786ms
+[info] set current project to contiki-contact-tracing (in build file:/home/massimiliano/contiki/contiki-contact-tracing/)
+[debug] > Exec(sbtPopOnFailure, None, None)
+[debug] > Exec(resumeFromFailure, None, None)
+[debug] > Exec(notifyUsersAboutShell, None, None)
+[debug] > Exec(iflast shell, None, None)
+[debug] > Exec(shell, None, None)
+[info] sbt server started at local:///home/massimiliano/.sbt/1.0/server/67a3ef77962ce4c139ee/sock
+[info] started sbt server
